@@ -1,0 +1,7 @@
+# DPM project-scoped Codex configuration
+# Keep secrets and personal credentials out of this file.
+# Repository engineering behavior is defined by AGENTS.md and skills.
+# Independent review configuration is under .codex/agents/.
+# Command publication controls are under .codex/rules/.
+# Use the approval/sandbox configuration approved for the DPM engineering environment.
+# Git commit, push and PR creation must remain approval-gated publication actions.

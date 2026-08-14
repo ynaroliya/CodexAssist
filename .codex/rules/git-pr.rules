@@ -1,0 +1,22 @@
+# DPM Git / PR publication controls
+# Require approval for commands that publish or package local changes for publication.
+prefix_rule(
+    pattern = ["git", "commit"],
+    decision = "prompt",
+    justification = "DPM requires explicit human approval before committing a Codex-authored change."
+)
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "DPM requires explicit human approval before pushing a Codex-authored branch."
+)
+prefix_rule(
+    pattern = ["gh", "pr", "create"],
+    decision = "prompt",
+    justification = "DPM requires explicit human approval before creating a pull request."
+)
+prefix_rule(
+    pattern = ["gh", "pr", "merge"],
+    decision = "forbidden",
+    justification = "PR merge is outside the Codex PR-publication approval boundary."
+)
