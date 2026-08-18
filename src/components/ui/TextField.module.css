@@ -1,0 +1,30 @@
+.root {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+}
+
+.label {
+  color: #18181b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.helper,
+.error {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0;
+}
+
+.helper {
+  color: #6b6b70;
+}
+
+.error {
+  color: #d42b2b;
+}
