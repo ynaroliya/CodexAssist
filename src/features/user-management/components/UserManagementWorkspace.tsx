@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
 import type { ManagedUser, UserRole } from "@/shared/contracts/user-management";
 import { userManagementClient } from "../client";
 
@@ -18,13 +20,13 @@ function InvitationForm({ actorRole }: { actorRole: UserRole }) {
   const assignableRoles = actorRole === "DECORATOR_ADMIN" ? ["DECORATOR_USER"] as UserRole[] : roles;
   const [message, setMessage] = useState<string>(); const [invitationId, setInvitationId] = useState<string>(); const [role, setRole] = useState<UserRole>(assignableRoles[0]);
   async function submit(formData: FormData) { try { const response = await userManagementClient.createInvitation({ email: String(formData.get("email")), role, decoratorId: role.startsWith("DECORATOR") && actorRole !== "DECORATOR_ADMIN" ? String(formData.get("decoratorId")) : undefined }); setInvitationId(response.invitation.id); setMessage("Invitation created. Retrieve the local verification code below."); } catch (cause) { setMessage(cause instanceof Error ? cause.message : "Unable to create invitation."); } }
-  return <form action={submit} className="invite-form"><label>Email<input name="email" type="email" required /></label><label>Role<select name="role" value={role} onChange={(event) => setRole(event.target.value as UserRole)}>{assignableRoles.map((item) => <option key={item}>{item}</option>)}</select></label>{role.startsWith("DECORATOR") && actorRole !== "DECORATOR_ADMIN" && <label>Decorator ID<input name="decoratorId" required placeholder="dec_north" /></label>}<button className="button">Invite user</button>{message && <p className="success" role="status">{message}{invitationId && <> <Link href={`/invitation/${invitationId}/verify`}>Open verification</Link></>}</p>}</form>;
+  return <form action={submit} className="invite-form"><TextField label="Email" name="email" type="email" required /><label>Role<select name="role" value={role} onChange={(event) => setRole(event.target.value as UserRole)}>{assignableRoles.map((item) => <option key={item}>{item}</option>)}</select></label>{role.startsWith("DECORATOR") && actorRole !== "DECORATOR_ADMIN" && <TextField label="Decorator ID" name="decoratorId" required placeholder="dec_north" />}<Button type="submit">Invite user</Button>{message && <p className="success" role="status">{message}{invitationId && <> <Link href={`/invitation/${invitationId}/verify`}>Open verification</Link></>}</p>}</form>;
 }
 
 function MockInbox() {
   const [messages, setMessages] = useState<Array<{ id: string; email: string; otp: string; expiresAt: string }>>([]); const [error, setError] = useState<string>();
   async function load() { try { setError(undefined); setMessages((await userManagementClient.listMockInbox()).messages); } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to open local inbox."); } }
-  return <section className="mock-inbox" aria-labelledby="mock-inbox-title"><div><h2 id="mock-inbox-title">Local mock inbox</h2><p>Use this local-only testing aid instead of email delivery.</p></div><button className="button secondary" type="button" onClick={load}>Refresh inbox</button>{error && <p className="error" role="alert">{error}</p>}{messages.length > 0 && <ul>{messages.map((message) => <li key={message.id}><strong>{message.email}</strong><span>Code: {message.otp} · expires {new Date(message.expiresAt).toLocaleTimeString()}</span></li>)}</ul>}</section>;
+  return <section className="mock-inbox" aria-labelledby="mock-inbox-title"><div><h2 id="mock-inbox-title">Local mock inbox</h2><p>Use this local-only testing aid instead of email delivery.</p></div><Button type="button" variant="secondary" onClick={load}>Refresh inbox</Button>{error && <p className="error" role="alert">{error}</p>}{messages.length > 0 && <ul>{messages.map((message) => <li key={message.id}><strong>{message.email}</strong><span>Code: {message.otp} · expires {new Date(message.expiresAt).toLocaleTimeString()}</span></li>)}</ul>}</section>;
 }
 
 function UserTable({ users, loading, error }: { users: ManagedUser[]; loading: boolean; error?: string }) {
@@ -38,5 +40,5 @@ function UserActions({ user }: { user: ManagedUser }) {
   const [permissions, setPermissions] = useState<string[]>();
   async function showPermissions() { setPermissions((await userManagementClient.getManagedUser(user.id)).user.permissions); }
   async function toggle(permission: string) { const next = (permissions ?? []).includes(permission) ? (permissions ?? []).filter((item) => item !== permission) : [...(permissions ?? []), permission]; await userManagementClient.manageUser(user.id, { permissions: next }); setPermissions(next); }
-  return <><button className="text-link" type="button" onClick={() => userManagementClient.manageUser(user.id, { status: user.status === "ACTIVE" ? "DEACTIVATED" : "ACTIVE" }).then(() => window.location.reload())}>{user.status === "ACTIVE" ? "Deactivate" : "Reactivate"}</button><button className="text-link" type="button" onClick={showPermissions}>Permissions</button>{permissions && <fieldset><legend>{user.displayName} permissions</legend>{["MANAGE_BSN_USERS", "MANAGE_DECORATOR_ADMINS", "MANAGE_DECORATOR_USERS"].map((permission) => <label key={permission}><input type="checkbox" checked={permissions.includes(permission)} onChange={() => toggle(permission)} />{permission}</label>)}</fieldset>}</>;
+  return <><Button type="button" variant="tertiary" onClick={() => userManagementClient.manageUser(user.id, { status: user.status === "ACTIVE" ? "DEACTIVATED" : "ACTIVE" }).then(() => window.location.reload())}>{user.status === "ACTIVE" ? "Deactivate" : "Reactivate"}</Button><Button type="button" variant="tertiary" onClick={showPermissions}>Permissions</Button>{permissions && <fieldset><legend>{user.displayName} permissions</legend>{["MANAGE_BSN_USERS", "MANAGE_DECORATOR_ADMINS", "MANAGE_DECORATOR_USERS"].map((permission) => <label key={permission}><input type="checkbox" checked={permissions.includes(permission)} onChange={() => toggle(permission)} />{permission}</label>)}</fieldset>}</>;
 }
